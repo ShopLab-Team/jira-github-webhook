@@ -22,6 +22,15 @@ do
   cp $file $BUILD_PATH
 done
 
+cp -R modules $BUILD_PATH/
+
+# go to build folder
+cd $BUILD_PATH
+npm pkg delete scripts.prepare
+
+# go back to root folder
+cd ../../../
+
 echo "Deploying to Digitalocean Functions..."
 cd ../ && doctl serverless deploy jira-github-webhook --trace
 

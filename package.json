@@ -14,7 +14,8 @@
   },
   "nodemonConfig": {
     "watch": [
-      "webhook.js"
+      "webhook.js",
+      "./modules/*.js"
     ],
     "ext": "js",
     "events": {

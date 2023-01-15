@@ -32,6 +32,8 @@ do
   cp $file $BUILD_PATH
 done
 
+cp -R modules $BUILD_PATH/
+
 read -p "Is this the first time you deploy this project? (y/n) " -n 1 -r
 echo
 if [[ $REPLY =~ ^[Yy]$ ]]
@@ -40,8 +42,15 @@ then
   doctl serverless install
   
   echo "Connecting to Digitalocean Functions..."
-  doctl serverless connect  
-  
+  doctl serverless connect
+
+  # go to build folder
+  cd $BUILD_PATH
+  npm pkg delete scripts.prepare
+
+  # go back to root folder
+  cd ../../../ 
+
   echo "Deploying to Digitalocean Functions..."
   cd ../ && doctl serverless deploy jira-github-webhook --trace
   
@@ -50,6 +59,13 @@ then
   
   exit 1
 fi
+
+# go to build folder
+cd $BUILD_PATH
+npm pkg delete scripts.prepare
+
+# go back to root folder
+cd ../../../
 
 echo "Deploying to Digitalocean Functions..."
 cd ../ && doctl serverless deploy jira-github-webhook --trace
