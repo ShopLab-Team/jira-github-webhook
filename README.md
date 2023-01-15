@@ -5,9 +5,12 @@ This application is a Github webhook listener that listens for JIRA tickets to b
 ## Prerequisites
 - A GitHub account and access to a repository
 - A JIRA account and access to a project
-- A DigitalOcean account
-- doctl (DigitalOcean command line tool) installed and configured on your local machine
+- A DigitalOcean account (or other serverless functions hoster)
+- doctl (DigitalOcean command line tool) installed and configured on your local machine (if using DO - otherwise make sure to take a look at the build.sh script and adjust the commands accordingly)
 - Node.js and npm (Node Package Manager) installed on your local machine
+
+## Note
+This setup is was made specifically for Digitalocean so if you want to use another serverless functions hoster you will need to adjust the build.sh script accordingly and may do some changes to the code.
 
 ## Installation
 1. Clone the repository to your local machine.
@@ -21,9 +24,9 @@ GITHUB_CLASSIC_TOKEN.
 This token is used for authenticating with the GitHub API. You can create a new token by going to your GitHub settings and selecting "Personal access tokens".
 
 ## Usage
-The webhook will trigger when a comment is made on a pull request in GitHub that contains a JIRA ticket key. The JIRA ticket will be updated based on the status of the pull request. The script will also check if the pull request meets all necessary requirements, and if so, it will be merged.
+ToDo
 
-## Deployment
+## Deployment on DigitalOcean
 The function can be deployed to DigitalOcean using the doctl command line tool. To deploy the function and start watching for changes, run the following command in the project root directory:
 
 ```bash 

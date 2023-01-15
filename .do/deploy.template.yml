@@ -10,4 +10,4 @@ functions:
   routes:
   - path: /
   source_dir: /
-name: github-jira-webhook
+name: jira-github-webhook
