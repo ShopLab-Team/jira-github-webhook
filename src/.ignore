@@ -1,0 +1,5 @@
+coverage/
+package-lock.json
+test
+.eslintrc.js
+.prettierrc
