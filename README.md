@@ -5,25 +5,38 @@ This application is a Github webhook listener that listens for JIRA tickets to b
 ## Prerequisites
 - A GitHub account and access to a repository
 - A JIRA account and access to a project
-- A DigitalOcean account
-- doctl (DigitalOcean command line tool) installed and configured on your local machine
+- A DigitalOcean account (or other serverless functions hoster)
+- doctl (DigitalOcean command line tool) installed and configured on your local machine (if using DO - otherwise make sure to take a look at the build.sh script and adjust the commands accordingly)
 - Node.js and npm (Node Package Manager) installed on your local machine
+
+## Note
+This setup is was made specifically for Digitalocean so if you want to use another serverless functions hoster you will need to adjust the build.sh script accordingly and may do some changes to the code.
 
 ## Installation
 1. Clone the repository to your local machine.
-2. In the project root directory, run bash install.sh to install the dependencies.
+2. In the project root directory, run `npm install` to install the dependencies.
 3. Create a new function in DigitalOcean using the doctl command line tool by running doctl compute function create <FUNCTION_NAME>.
-4. Navigate to the /src/ folder and run npm run watch to start the development server.
-5. Create a new GitHub webhook for the repository you want to connect to JIRA. In the webhook settings, set the payload URL to the URL of your DigitalOcean function, and choose the "Issue comment" trigger.
-6. In the JIRA project you want to connect to GitHub, create a new webhook that sends a payload to the URL of your DigitalOcean function.
-7. In the root directory of the project, create a new file called .env and add the following environment variables:
+4. Build the project and deploy to DigitalOcean by running the do-init.sh script in the project root directory.
+5. Go to JIRA Actions and create an action that triggers a webhook POST. In the webhook settings, set the payload URL to the URL of your DigitalOcean function, and choose any trigger.
+6. In the root directory of the project, create a new file called .env and add the following environment variables:
 GITHUB_CLASSIC_TOKEN.
 This token is used for authenticating with the GitHub API. You can create a new token by going to your GitHub settings and selecting "Personal access tokens".
 
 ## Usage
-The webhook will trigger when a comment is made on a pull request in GitHub that contains a JIRA ticket key. The JIRA ticket will be updated based on the status of the pull request. The script will also check if the pull request meets all necessary requirements, and if so, it will be merged.
+```bash
+# run watcher simply run
+npm run watch
+```
+This will watch for changes in the project, copy them to the build folder and deploy the function to DigitalOcean.
 
-## Deployment
+--
+
+```bash
+# run tests 
+npm run lint
+```
+
+## Deployment on DigitalOcean
 The function can be deployed to DigitalOcean using the doctl command line tool. To deploy the function and start watching for changes, run the following command in the project root directory:
 
 ```bash 
@@ -33,7 +46,7 @@ doctl compute function deploy <FUNCTION_NAME> --watch
 You can also use the command `doctl compute function create <FUNCTION_NAME>` to create a new function in DigitalOcean. 
 
 Alternatively you want to use packages.scripts in package.json - like npm run watch - which will also deploy the function to DigitalOcean and watch or
-use install.sh to deploy the function once. This script can be executed multiple times to update the function.
+use do-init.sh to deploy the function once. This script can be executed multiple times to update the function.
 
 ## Connecting to JIRA
 You will need to create a new webhook in the JIRA automation settings. The webhook should send a payload to the URL of your DigitalOcean function.

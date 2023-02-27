@@ -1,80 +1,9 @@
-/**
- * @author: Mark <ShopLab Team>
- * @description: This webhook is triggered from JIRA Actions and approves the corresponding pull request in Github.
- * @version: 1.2.0
- * @license: The Unlicense (https://unlicense.org/)
- * @see:
- * https://developer.github.com/v3/pulls/
- */
-
 // eslint-disable-next-line import/no-extraneous-dependencies
 const { Octokit } = require("@octokit/core");
 
 const octokit = new Octokit({ auth: process.env.GITHUB_CLASSIC_TOKEN });
 
-/**
- * Checks if the title starts with the (release) keyword
- * @param {string} title
- * @returns {boolean}
- */
-const startsWithRelease = (title) => {
-  const startsWithRegex = /^\(release\)/i;
-  return title.match(startsWithRegex);
-};
-
-/**
- * Checks if the title contains the ticket key and returns the matching key if found
- * @param {string} title
- * @param {string} ticketKey
- * @returns {Array | null} The match array if the key is found, null otherwise
- */
-const containsTicketKey = (title, ticketKey) => {
-  const projectPrefix = ticketKey.split("-")[0];
-  const containsTicketKeyRegex = new RegExp(`(${projectPrefix}-\\d+)`, "i");
-  return title.match(containsTicketKeyRegex);
-};
-
-/**
- * Checks if the ticket key is in the pull request title
- * @param {string} prTitle
- * @param {string} ticketKey
- * @returns {object} {success: boolean, message: string, data: string}
- */
-const isTicketInPrTitle = (prTitle, ticketKey) => {
-  // Check if the title starts with "(release)"
-  if (!startsWithRelease(prTitle)) {
-    return {
-      success: false,
-      message: `Ticket does not match required prefix (release) in pull request title ${prTitle}`,
-      data: null
-    };
-  }
-
-  // Check if the title contains the ticket key
-  const match = containsTicketKey(prTitle, ticketKey);
-  if (!match) {
-    return {
-      success: false,
-      message: `No match found for ticket key ${ticketKey} in pull request title ${prTitle}`,
-      data: null
-    };
-  }
-
-  // Check if the ticket key in the title matches the given ticket key
-  if (match[1].toUpperCase() !== ticketKey.toUpperCase()) {
-    return {
-      success: false,
-      message: `Ticket key in pull request title does not match ${ticketKey}`,
-      data: null
-    };
-  }
-
-  return {
-    success: true,
-    message: "Ticket key found in pull request title",
-    data: match[1]
-  };
-};
+const { isTicketInPrTitle } = require("./helpers");
 
 /**
  * Finds the pull request for the given ticket key
@@ -364,79 +293,8 @@ async function mergePullRequest(pullRequestNr, gitRepoName, gitRepoOwner) {
   }
 }
 
-/**
- * Main function that is called by the webhook
- * @param {json} jsonPayload
- * @returns {object} {success: boolean, message: string}
- */
-exports.main = async (jsonPayload) => {
-  const webhookPayload = jsonPayload;
-
-  // check if the webhook payload contains the required data
-  const {
-    project,
-    key: ticketKey,
-    status: ticketStatus,
-    github_repo_name: gitRepoName,
-    github_repo_owner: gitRepoOwner
-  } = webhookPayload;
-
-  if (
-    !project ||
-    !ticketKey ||
-    !ticketStatus ||
-    !gitRepoName ||
-    !gitRepoOwner
-  ) {
-    return {
-      statusCode: 400,
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        success: false,
-        message: "Missing required data from payload"
-      })
-    };
-  }
-
-  // lookup the pull request number for the given ticket key
-  const pullRequestResult = await findPullRequest(
-    ticketKey,
-    gitRepoName,
-    gitRepoOwner
-  );
-
-  if (pullRequestResult.success) {
-    const approvalResult = await approvePullRequest(
-      pullRequestResult.data,
-      gitRepoName,
-      gitRepoOwner,
-      ticketKey,
-      ticketStatus
-    );
-    if (!approvalResult.success) {
-      return {
-        statusCode: 400,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(approvalResult)
-      };
-    }
-
-    // merge the pull request
-    const mergeResult = await mergePullRequest(
-      pullRequestResult.data,
-      gitRepoName,
-      gitRepoOwner
-    );
-
-    return {
-      statusCode: 200,
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(mergeResult)
-    };
-  }
-  return {
-    statusCode: 400,
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(pullRequestResult)
-  };
+module.exports = {
+  findPullRequest,
+  mergePullRequest,
+  approvePullRequest
 };

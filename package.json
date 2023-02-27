@@ -1,24 +1,25 @@
 {
   "name": "Webhook - Jira Pull Request Merge Action",
-  "version": "1.5.0",
+  "version": "1.6.0",
   "description": "This is a webhook function that will merge a pull request in Github with a given Jira issue key.",
   "main": "webhook.js",
   "scripts": {
-    "run_nodemon": "nodemon webhook.js",
-    "watch": "npm run run_nodemon",
+    "run:nodemon": "nodemon webhook.js",
+    "watch": "npm run run:nodemon",
     "_lint": "eslint --config ./.eslintrc.js --ext js --ext jsx --ext tsx --ext ts",
     "lint": "npm run _lint -- ./webhook.js",
     "lint:fix": "npm run _lint -- --fix ./webhook.js",
     "format": "prettier --write './**/*.{js,jsx,ts}' --config ./.prettierrc",
-    "precommit": "npm run lint && npm run format"
+    "prepare": "husky install"
   },
   "nodemonConfig": {
     "watch": [
-      "./"
+      "webhook.js",
+      "./modules/*.js"
     ],
     "ext": "js",
     "events": {
-      "restart": "cd ../ && bash ./build.sh"
+      "restart": "bash do-update.sh"
     }
   },
   "dependencies": {
@@ -31,6 +32,7 @@
     "eslint-plugin-import": "^2.27.4",
     "eslint-plugin-jsx-a11y": "^6.7.1",
     "eslint-plugin-prettier": "^4.2.1",
+    "husky": "^8.0.3",
     "nodemon": "^2.0.20",
     "prettier": "^2.8.3"
   }
